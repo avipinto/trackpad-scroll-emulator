@@ -8,17 +8,20 @@
   position: relative;
   width: 200px; /* Default value. Overwite this if you want. */
   height: 300px; /* Default value. Overwite this if you want. */
+  /*height:100%;*/
   overflow: hidden;
   }
   .tse-scrollable .tse-scroll-content {
     overflow: hidden;
-    overflow-y: scroll;
+    height:100%;
+    width:100%;
     }
     /* No longer using ::scrollbar too, since it breaks Chrome 25 */
     .tse-scrollable .tse-scroll-content::-webkit-scrollbar {
-      width: 0;
-      height: 0;
+      width: 17px; /*set the scroll in chrome to be the same width of other browsers so it will push the content of the div*/
+      height: 17px;
       }
+.tse-scrollable .tse-vertScroll{ overflow-y: scroll; } /*ow the scroll after we append the shim to hide the regular one      */
 .tse-scrollbar {
   z-index: 99;
   position: absolute;
@@ -27,6 +30,14 @@
   bottom: 0;
   width: 11px;
   }
+  .tse-shim { 
+    background-color:#FFF; /*r hiding the real scroll  you will have to override it on different bg containers */
+    height:100%;
+    position:absolute;
+    right:0;
+    top:0;
+    min-width:17px; /* min 17 px so the shim will look almost the same in all browsers*/
+  } 
   .tse-scrollbar .drag-handle {
     position: absolute;
     right: 2px;

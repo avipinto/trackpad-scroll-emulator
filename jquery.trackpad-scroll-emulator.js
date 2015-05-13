@@ -1,11 +1,44 @@
 /*!
  * TrackpadScrollEmulator
- * Version: 1.0.8
+ * Version: 1.0.8.1
  * Author: Jonathan Nicol @f6design
  * https://github.com/jnicol/trackpad-scroll-emulator
+ * forked to support width and height of 100% at https://github.com/avipinto/trackpad-scroll-emulator
  */
 ;(function($) {
   var pluginName = 'TrackpadScrollEmulator';
+  var compScrollbarWidth = null;
+  /**
+       * Calculate scrollbar width
+       *
+       * Original function by Jonathan Sharp:
+       * http://jdsharp.us/jQuery/minute/calculate-scrollbar-width.php
+       * Updated to work in Chrome v25.
+       */
+  function scrollbarWidth()
+  {
+      //we have to call this only once - the scroll width will not change after called once
+      if (compScrollbarWidth !== null)
+      {
+          return compScrollbarWidth;
+      }
+      // Append a temporary scrolling element to the DOM, then measure
+      // the difference between between its outer and inner elements.
+      var tempEl = $('<div class="scrollbar-width-tester" style="width:50px;height:50px;overflow-y:scroll;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div>');
+      $('body').append(tempEl);
+      var width = $(tempEl).innerWidth();
+      var widthMinusScrollbars = $('div', tempEl).innerWidth();
+      tempEl.remove();
+      // On OS X if the scrollbar is set to auto hide it will have zero width. On webkit we can still
+      // hide it using ::-webkit-scrollbar { width:0; height:0; } but there is no moz equivalent. So we're
+      // forced to sniff Firefox and return a hard-coded scrollbar width. I know, I know...
+      if (width === widthMinusScrollbars && navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+      {
+          compScrollbarWidth = 17;
+      }
+      compScrollbarWidth = (width - widthMinusScrollbars);
+      return compScrollbarWidth;
+  }
 
   function Plugin(element, options) {
     var el = element;
@@ -43,7 +76,16 @@
         $contentEl.wrap('<div class="tse-scroll-content" />');
       }
       $scrollContentEl = $el.find('.tse-scroll-content:first');
-
+      if (scrollDirection === 'vert')
+      {
+          var shim = $('<div class="tse-shim" />');
+          if (scrollbarWidth())
+          {
+              shim.width(scrollbarWidth());
+          }
+          shim.prependTo($scrollContentEl);
+          $scrollContentEl.addClass("tse-vertScroll");
+      }
       resizeScrollContent();
 
       if (options.autoHide) {
@@ -209,37 +251,14 @@
      */
     function resizeScrollContent() {
       if (scrollDirection === 'vert'){
-        $scrollContentEl.width($el.width()+scrollbarWidth());
-        $scrollContentEl.height($el.height());
+          // height:100%;width:100%; on the $scrollContentEl (tse-scroll-content) lets us avoid from setting it
+          //$scrollContentEl.width($el.width() + scrollbarWidth());
+          // $scrollContentEl.height($el.height());
       } else {
         $scrollContentEl.width($el.width());
         $scrollContentEl.height($el.height()+scrollbarWidth());
         $contentEl.height($el.height());
       }
-    }
-
-    /**
-     * Calculate scrollbar width
-     *
-     * Original function by Jonathan Sharp:
-     * http://jdsharp.us/jQuery/minute/calculate-scrollbar-width.php
-     * Updated to work in Chrome v25.
-     */
-    function scrollbarWidth() {
-      // Append a temporary scrolling element to the DOM, then measure
-      // the difference between between its outer and inner elements.
-      var tempEl = $('<div class="scrollbar-width-tester" style="width:50px;height:50px;overflow-y:scroll;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div>');
-      $('body').append(tempEl);
-      var width = $(tempEl).innerWidth();
-      var widthMinusScrollbars = $('div', tempEl).innerWidth();
-      tempEl.remove();
-      // On OS X if the scrollbar is set to auto hide it will have zero width. On webkit we can still
-      // hide it using ::-webkit-scrollbar { width:0; height:0; } but there is no moz equivalent. So we're
-      // forced to sniff Firefox and return a hard-coded scrollbar width. I know, I know...
-      if (width === widthMinusScrollbars && navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-        return 17;
-      }
-      return (width - widthMinusScrollbars);
     }
 
     /**
