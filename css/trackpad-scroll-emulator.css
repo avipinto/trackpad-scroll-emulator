@@ -37,6 +37,7 @@
     right:0;
     top:0;
     min-width:17px; /* min 17 px so the shim will look almost the same in all browsers*/
+        pointer-events: none !important; /*in browsers that support it - clicking on the shim willbe as if you clicked on the actual scroll */
   } 
   .tse-scrollbar .drag-handle {
     position: absolute;
