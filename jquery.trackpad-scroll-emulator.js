@@ -36,7 +36,11 @@
       {
           compScrollbarWidth = 17;
       }
-      compScrollbarWidth = (width - widthMinusScrollbars);
+      else
+      {
+          compScrollbarWidth = (width - widthMinusScrollbars);
+      }
+      compScrollbarWidth += 3;//when window.devicePixelRatio is not 1 especially in FF we need 3 more pixels
       return compScrollbarWidth;
   }
 
